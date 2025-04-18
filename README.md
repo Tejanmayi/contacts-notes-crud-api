@@ -17,7 +17,7 @@ A robust backend service for managing contact notes with authentication, rate li
 1. Create a virtual environment:
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate  # On Mac: source venv/bin/activate 
 ```
 
 2. Install dependencies:
@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 3. Set up environment variables:
 ```bash
-cp .env.example .env
+.env
 # Edit .env with your configuration
 ```
 
