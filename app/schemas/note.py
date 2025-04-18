@@ -1,21 +1,29 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, Field
 
 class NoteBase(BaseModel):
-    body: str = Field(..., description="The content of the note")
-    contact_id: int = Field(..., description="The ID of the contact this note belongs to")
+    """Base schema for note data."""
+    body: str = Field(..., description="Content of the note")
+    contact_id: int = Field(..., description="ID of the associated contact")
 
 class NoteCreate(NoteBase):
+    """Schema for creating a new note."""
     pass
 
 class NoteUpdate(BaseModel):
-    body: Optional[str] = None
-    contact_id: Optional[int] = None
+    """Schema for updating an existing note."""
+    body: str = Field(..., description="Content of the note")
 
-class NoteResponse(NoteBase):
+class NoteInDB(NoteBase):
+    """Schema for note data in the database."""
     id: int
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True) 
+    class Config:
+        from_attributes = True
+
+class NoteResponse(NoteInDB):
+    """Schema for note response."""
+    pass 
