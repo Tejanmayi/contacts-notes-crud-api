@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from typing import List, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
 from sqlalchemy.orm import Session
 from app.core.auth import get_current_user
 from app.db.session import get_db
@@ -13,20 +13,23 @@ router = APIRouter()
 
 @router.post("/", response_model=NoteResponse, status_code=status.HTTP_201_CREATED)
 async def create_note(
-    request: Request,
+    data: Dict[str, Any] = Body(..., example={
+        "content": "Meeting notes",
+        "contact_id": 1
+    }),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
     Create a new note.
+    
+    The API accepts various field names that will be normalized:
+    - For content: "content", "body", "text", "message", "note", "description"
+    - For contact_id: "contact_id", "contactId", "contact", "person_id", "personId"
     """
     try:
-        # Read raw request body
-        body = await request.body()
-        raw_data = json.loads(body)
-        
         # Normalize the data
-        normalized_data = FieldNormalizer.normalize_note_data(raw_data)
+        normalized_data = FieldNormalizer.normalize_note_data(data)
         
         # Validate required fields
         validation_error = FieldNormalizer.validate_required_fields(normalized_data)
@@ -47,11 +50,6 @@ async def create_note(
         db.refresh(db_note)
         return db_note
         
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid JSON in request body"
-        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
